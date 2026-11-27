@@ -151,3 +151,17 @@ export async function syncLibraryToCloud() {
   }
   window.dispatchEvent(new Event("nexus-library-synced"));
 }
+
+export async function setCloudFavourite(gameId: string, enabled: boolean) {
+  if (!client) return;
+  const { data } = await client.auth.getUser();
+  if (!data.user) return;
+  if (enabled) await client.from("user_favourites").upsert({user_id:data.user.id,game_id:gameId},{onConflict:"user_id,game_id"});
+  else await client.from("user_favourites").delete().eq("user_id",data.user.id).eq("game_id",gameId);
+}
+export async function recordRecentGame(gameId: string) {
+  if (!client) return;
+  const { data } = await client.auth.getUser();
+  if (!data.user) return;
+  await client.from("user_recent_games").upsert({user_id:data.user.id,game_id:gameId,played_at:new Date().toISOString()},{onConflict:"user_id,game_id"});
+}
