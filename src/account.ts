@@ -50,7 +50,7 @@ export async function renderAccountPage() {
     if (event === "PASSWORD_RECOVERY" && session?.user) { renderRecovery(); return; }
     if (session?.user) { renderSignedIn(session.user); void syncLibraryToCloud(); }
     else renderSignedOut();
-  });
+  }).data.subscription;
 }
 
 function renderRecovery() {
