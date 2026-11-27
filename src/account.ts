@@ -4,6 +4,7 @@ const env = (import.meta as ImportMeta & { env: Record<string,string|undefined> 
 const supabaseUrl = env.VITE_SUPABASE_URL;
 const supabaseAnonKey = env.VITE_SUPABASE_ANON_KEY;
 let client: SupabaseClient | null = null;
+let authSubscription: { unsubscribe: () => void } | null = null;
 if (supabaseUrl && supabaseAnonKey) client = createClient(supabaseUrl, supabaseAnonKey);
 
 const escapeHtml = (value: string) => value.replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c] || c));
@@ -40,11 +41,12 @@ export async function renderAccountPage() {
     return;
   }
   const user = await currentUser();
-  if (user) renderSignedIn(user);
+  if (user) { renderSignedIn(user); await syncLibraryToCloud(); }
   else renderSignedOut();
-  client.auth.onAuthStateChange((_event, session) => {
+  authSubscription?.unsubscribe();
+  authSubscription = client!.auth.onAuthStateChange((_event, session) => {
     if (!document.querySelector("#account-panel")) return;
-    if (session?.user) renderSignedIn(session.user);
+    if (session?.user) { renderSignedIn(session.user); void syncLibraryToCloud(); }
     else renderSignedOut();
   });
 }
@@ -106,4 +108,24 @@ async function renderSignedIn(user: User) {
   const rec=document.querySelector<HTMLElement>("#cloud-recent");
   if(fav)fav.textContent=String(favourites??0);
   if(rec)rec.textContent=String(recent??0);
+}
+
+export async function syncLibraryToCloud() {
+  if (!client) return;
+  const { data: auth } = await client.auth.getUser();
+  if (!auth.user) return;
+  const localFavs: string[] = JSON.parse(localStorage.getItem("nexus-favorites") || "[]");
+  const localRecent: string[] = JSON.parse(localStorage.getItem("nexus-recent") || "[]");
+  if (localFavs.length) await client.from("user_favourites").upsert(localFavs.map(game_id=>({game_id})),{onConflict:"user_id,game_id"});
+  if (localRecent.length) await client.from("user_recent_games").upsert(localRecent.map(game_id=>({game_id,played_at:new Date().toISOString()})),{onConflict:"user_id,game_id"});
+  const [favs,recentGames] = await Promise.all([
+    client.from("user_favourites").select("game_id"),
+    client.from("user_recent_games").select("game_id,played_at").order("played_at",{ascending:false}).limit(30)
+  ]);
+  if (!favs.error && favs.data) localStorage.setItem("nexus-favorites",JSON.stringify([...new Set([...localFavs,...favs.data.map(row=>row.game_id)])]));
+  if (!recentGames.error && recentGames.data) {
+    const merged=[...localRecent,...recentGames.data.map(row=>row.game_id)];
+    localStorage.setItem("nexus-recent",JSON.stringify([...new Set(merged)].slice(0,30)));
+  }
+  window.dispatchEvent(new Event("nexus-library-synced"));
 }
