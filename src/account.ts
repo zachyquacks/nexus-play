@@ -58,7 +58,7 @@ function renderSetupPanel() {
 function renderSignedOut() {
   const panel = document.querySelector<HTMLElement>("#account-panel");
   if (!panel) return;
-  panel.innerHTML = '<div class="account-tabs"><button class="account-tab active" data-auth-tab="login">Sign in</button><button class="account-tab" data-auth-tab="signup">Create account</button></div><form id="auth-form" class="auth-form"><label>Email address<input name="email" type="email" autocomplete="email" required placeholder="you@example.com"></label><label>Password<input name="password" type="password" autocomplete="current-password" minlength="8" required placeholder="At least 8 characters"></label><button class="primary-btn" type="submit" id="auth-submit">Sign in ↗</button></form><p class="account-muted">Use an email you can access. New accounts may need email confirmation depending on your Supabase settings.</p>';
+  panel.innerHTML = '<div class="account-tabs"><button class="account-tab active" data-auth-tab="login">Sign in</button><button class="account-tab" data-auth-tab="signup">Create account</button></div><form id="auth-form" class="auth-form"><label>Email address<input name="email" type="email" autocomplete="email" required placeholder="you@example.com"></label><label>Password<input name="password" type="password" autocomplete="current-password" minlength="8" required placeholder="At least 8 characters"></label><button class="primary-btn" type="submit" id="auth-submit">Sign in ↗</button></form><button class="text-btn" type="button" id="forgot-password">Forgot password?</button><p class="account-muted">Use an email you can access. New accounts may need email confirmation depending on your Supabase settings.</p>';
   let mode: "login"|"signup" = "login";
   panel.querySelectorAll<HTMLButtonElement>("[data-auth-tab]").forEach(button=>button.addEventListener("click",()=>{
     mode = button.dataset.authTab === "signup" ? "signup" : "login";
@@ -68,6 +68,12 @@ function renderSignedOut() {
     if(submit)submit.textContent=mode==="signup"?"Create account ↗":"Sign in ↗";
     if(password)password.autocomplete=mode==="signup"?"new-password":"current-password";
   }));
+  panel.querySelector<HTMLButtonElement>("#forgot-password")?.addEventListener("click",async()=>{
+    const email=panel.querySelector<HTMLInputElement>('input[name="email"]')?.value.trim();
+    if(!email){showMessage("Enter your email address first, then choose Forgot password.",true);return;}
+    const {error}=await client!.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin});
+    if(error)showMessage(error.message,true);else showMessage("If an account exists for that email, a password reset link has been sent.");
+  });
   panel.querySelector<HTMLFormElement>("#auth-form")?.addEventListener("submit",async event=>{
     event.preventDefault();
     const form=event.currentTarget as HTMLFormElement;
