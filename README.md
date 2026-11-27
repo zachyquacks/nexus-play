@@ -44,4 +44,4 @@ The Cloud Gaming page is a frontend preview, not a live VM service. Read [docs/C
 
 ## Notes
 
-The catalogue embeds selected games from [Saurabh Singh's Games Hub](https://github.com/sausi-7/games), an MIT-licensed open-source collection. The original game site remains the host; NEXUS PLAY does not claim ownership of those games. If a host blocks embedding, use the player's **Open in new tab** link. User favourites and history are browser-local; accounts, cloud sync, public leaderboards and admin publishing need a backend such as Supabase and are not enabled yet.
+The catalogue embeds selected games from [Saurabh Singh's Games Hub](https://github.com/sausi-7/games), an MIT-licensed open-source collection. The original game site remains the host; NEXUS PLAY does not claim ownership of those games. If a host blocks embedding, use the player's **Open in new tab** link. Account authentication and cloud library sync are implemented with Supabase but require your own project configuration. Public leaderboards and admin publishing are not enabled yet.
