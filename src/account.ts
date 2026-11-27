@@ -7,7 +7,8 @@ let client: SupabaseClient | null = null;
 let authSubscription: { unsubscribe: () => void } | null = null;
 if (supabaseUrl && supabaseAnonKey) client = createClient(supabaseUrl, supabaseAnonKey);
 
-const escapeHtml = (value: string) => value.replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c] || c));
+const htmlEntities: Record<string,string> = {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","\'":"&#39;"};
+const escapeHtml = (value: string) => value.replace(/[&<>"\']/g, c => htmlEntities[c] || c);
 const content = () => document.querySelector<HTMLElement>(".content");
 const showMessage = (message: string, error = false) => {
   const node = document.querySelector<HTMLElement>("#account-message");
