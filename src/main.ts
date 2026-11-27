@@ -1,5 +1,6 @@
 import "./style.css";
 import { bindExtraPages } from "./extra.js";
+import { syncLibraryToCloud } from "./account.js";
 
 type Game = { id: string; title: string; category: string; description: string; players: string; color: string; art: string; featured?: boolean; externalUrl?: string; };
 const gameBase = "https://sausi-7.github.io/games/games/";
@@ -78,7 +79,7 @@ function bind(){
   app.querySelectorAll<HTMLElement>("[data-view]").forEach(el=>el.addEventListener("click",()=>{activeView=el.dataset.view||"Home";activeCategory="All";render();}));
   app.querySelectorAll<HTMLElement>("[data-category]").forEach(el=>el.addEventListener("click",()=>{activeCategory=el.dataset.category||"All";render();}));
   app.querySelectorAll<HTMLElement>("[data-open]").forEach(el=>el.addEventListener("click",()=>openGame(el.dataset.open||"")));
-  app.querySelectorAll<HTMLElement>("[data-fav]").forEach(el=>el.addEventListener("click",()=>{const id=el.dataset.fav||"";favorites=favorites.includes(id)?favorites.filter(x=>x!==id):[...favorites,id];localStorage.setItem("nexus-favorites",JSON.stringify(favorites));render();}));
+  app.querySelectorAll<HTMLElement>("[data-fav]").forEach(el=>el.addEventListener("click",()=>{const id=el.dataset.fav||"";favorites=favorites.includes(id)?favorites.filter(x=>x!==id):[...favorites,id];localStorage.setItem("nexus-favorites",JSON.stringify(favorites));void syncLibraryToCloud();render();}));
   app.querySelector<HTMLElement>("[data-reset]")?.addEventListener("click",()=>{searchTerm="";activeCategory="All";render();});
   app.querySelector<HTMLInputElement>("#search")?.addEventListener("input",e=>{searchTerm=(e.target as HTMLInputElement).value;const pos=(e.target as HTMLInputElement).selectionStart;render();const input=app.querySelector<HTMLInputElement>("#search");input?.focus();input?.setSelectionRange(pos,pos);});
   document.onkeydown=e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==="k"){e.preventDefault();app.querySelector<HTMLInputElement>("#search")?.focus();}if(e.key==="Escape")closeModal();};
@@ -87,7 +88,7 @@ function openGame(id:string){const g=games.find(x=>x.id===id);if(!g)return;curre
   <div class="modal-backdrop" id="backdrop"><section class="game-modal"><button class="modal-close" id="close">×</button><div class="modal-art" style="--game-color:${g.color}"><span>${g.art}</span></div><div class="modal-content"><div class="eyebrow">${g.category.toUpperCase()} / BROWSER GAME</div><h2>${g.title}</h2><p>${g.description}</p><div class="modal-facts"><span>◉ ${g.players}</span><span>✓ No download required</span></div><button class="primary-btn" id="launch">▶ Launch game <b>↗</b></button></div></section></div>`;
 document.querySelector("#close")?.addEventListener("click",closeModal);document.querySelector("#backdrop")?.addEventListener("click",e=>{if(e.target===e.currentTarget)closeModal();});document.querySelector("#launch")?.addEventListener("click",()=>launchGame(g));}
 function closeModal(){if(snakeTimer)clearInterval(snakeTimer);snakeTimer=undefined;currentGame=null;document.querySelector("#modal-root")!.innerHTML="";}
-function launchGame(g:Game){recent=[g.id,...recent.filter(x=>x!==g.id)].slice(0,8);localStorage.setItem("nexus-recent",JSON.stringify(recent));
+function launchGame(g:Game){recent=[g.id,...recent.filter(x=>x!==g.id)].slice(0,8);localStorage.setItem("nexus-recent",JSON.stringify(recent));void syncLibraryToCloud();
 if(g.externalUrl){
 document.querySelector("#modal-root")!.innerHTML=`
   <div class="modal-backdrop"><section class="play-modal external-player"><div class="play-top"><div><span class="eyebrow">NOW PLAYING · HOSTED GAME</span><h2>${g.title}</h2></div><div class="player-actions"><a class="outline-btn" href="${g.externalUrl}" target="_blank" rel="noopener noreferrer">Open in new tab ↗</a><button class="modal-close" id="exit">×</button></div></div><iframe class="external-game-frame" src="${g.externalUrl}" title="${g.title}" loading="lazy" allow="fullscreen; gamepad" sandbox="allow-scripts allow-same-origin allow-forms allow-pointer-lock"></iframe><div class="play-bottom"><span>GAME HOSTED BY SAUSI-7 GAMES · OPEN-SOURCE COLLECTION</span><span>IF IT DOESN'T LOAD, USE OPEN IN NEW TAB ↗</span></div></section></div>`;
