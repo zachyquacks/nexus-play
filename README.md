@@ -11,6 +11,8 @@ A cinematic browser-game launcher built with Vite, TypeScript and vanilla DOM AP
 - External catalogue pages for GN-Math and Classroom 6x with new-tab fallbacks
 - Cloud Gaming dashboard preview with session pipeline and connection status
 - Settings page for local preferences and backend integration status
+- Supabase email sign-up/sign-in, player profile editing and sign-out UI
+- Supabase database schema with row-level security for profile, favourites and recent games
 - External game player with fullscreen/gamepad permissions where supported and open-in-new-tab fallback
 - Vercel-ready single-page routing
 
@@ -31,6 +33,10 @@ npm run preview
 ## Deploy
 
 Import this repository into Vercel. Framework preset: **Vite**. Build command: `npm run build`. Output directory: `dist`.
+
+## Accounts and cloud sync
+
+Account screens use Supabase Auth. To enable them, create a Supabase project, run `supabase/schema.sql` in its SQL Editor, then set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in the Vercel project environment and redeploy. Only the public anon key belongs in browser environment variables; never expose the service-role key. Account sign-up/login and profile editing are enabled after configuration. Favourites/recent-game tables are prepared with row-level security; syncing the existing local library into those tables is a separate integration step.
 
 ## Cloud gaming
 
