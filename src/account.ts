@@ -133,16 +133,17 @@ async function renderSignedIn(user: User) {
 }
 
 export async function syncLibraryToCloud() {
-  if (!client) return;
-  const { data: auth } = await client.auth.getUser();
+  const supabase = client;
+  if (!supabase) return;
+  const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) return;
   const localFavs: string[] = JSON.parse(localStorage.getItem("nexus-favorites") || "[]");
   const localRecent: string[] = JSON.parse(localStorage.getItem("nexus-recent") || "[]");
-  if (localFavs.length) await client.from("user_favourites").upsert(localFavs.map(game_id=>({user_id:auth.user!.id,game_id})),{onConflict:"user_id,game_id"});
-  if (localRecent.length) await client.from("user_recent_games").upsert(localRecent.map(game_id=>({user_id:auth.user!.id,game_id,played_at:new Date().toISOString()})),{onConflict:"user_id,game_id"});
+  if (localFavs.length) await supabase.from("user_favourites").upsert(localFavs.map(game_id=>({user_id:auth.user!.id,game_id})),{onConflict:"user_id,game_id"});
+  if (localRecent.length) await supabase.from("user_recent_games").upsert(localRecent.map(game_id=>({user_id:auth.user!.id,game_id,played_at:new Date().toISOString()})),{onConflict:"user_id,game_id"});
   const [favs,recentGames] = await Promise.all([
-    client.from("user_favourites").select("game_id"),
-    client.from("user_recent_games").select("game_id,played_at").order("played_at",{ascending:false}).limit(30)
+    supabase.from("user_favourites").select("game_id"),
+    supabase.from("user_recent_games").select("game_id,played_at").order("played_at",{ascending:false}).limit(30)
   ]);
   if (!favs.error && favs.data) localStorage.setItem("nexus-favorites",JSON.stringify([...new Set([...localFavs,...favs.data.map(row=>row.game_id)])]));
   if (!recentGames.error && recentGames.data) {
@@ -151,17 +152,18 @@ export async function syncLibraryToCloud() {
   }
   window.dispatchEvent(new Event("nexus-library-synced"));
 }
-
 export async function setCloudFavourite(gameId: string, enabled: boolean) {
-  if (!client) return;
-  const { data } = await client.auth.getUser();
+  const supabase = client;
+  if (!supabase) return;
+  const { data } = await supabase.auth.getUser();
   if (!data.user) return;
-  if (enabled) await client.from("user_favourites").upsert({user_id:data.user.id,game_id:gameId},{onConflict:"user_id,game_id"});
-  else await client.from("user_favourites").delete().eq("user_id",data.user.id).eq("game_id",gameId);
+  if (enabled) await supabase.from("user_favourites").upsert({user_id:data.user.id,game_id:gameId},{onConflict:"user_id,game_id"});
+  else await supabase.from("user_favourites").delete().eq("user_id",data.user.id).eq("game_id",gameId);
 }
 export async function recordRecentGame(gameId: string) {
-  if (!client) return;
-  const { data } = await client.auth.getUser();
+  const supabase = client;
+  if (!supabase) return;
+  const { data } = await supabase.auth.getUser();
   if (!data.user) return;
-  await client.from("user_recent_games").upsert({user_id:data.user.id,game_id:gameId,played_at:new Date().toISOString()},{onConflict:"user_id,game_id"});
+  await supabase.from("user_recent_games").upsert({user_id:data.user.id,game_id:gameId,played_at:new Date().toISOString()},{onConflict:"user_id,game_id"});
 }
