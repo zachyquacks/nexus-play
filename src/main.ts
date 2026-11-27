@@ -1,4 +1,5 @@
 import "./style.css";
+import { bindExtraPages } from "./extra.js";
 
 type Game = { id: string; title: string; category: string; description: string; players: string; color: string; art: string; featured?: boolean; externalUrl?: string; };
 const gameBase = "https://sausi-7.github.io/games/games/";
@@ -73,6 +74,7 @@ function render() {
   bind();
 }
 function bind(){
+  bindExtraPages();
   app.querySelectorAll<HTMLElement>("[data-view]").forEach(el=>el.addEventListener("click",()=>{activeView=el.dataset.view||"Home";activeCategory="All";render();}));
   app.querySelectorAll<HTMLElement>("[data-category]").forEach(el=>el.addEventListener("click",()=>{activeCategory=el.dataset.category||"All";render();}));
   app.querySelectorAll<HTMLElement>("[data-open]").forEach(el=>el.addEventListener("click",()=>openGame(el.dataset.open||"")));
