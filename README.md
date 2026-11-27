@@ -7,8 +7,8 @@ A cinematic browser-game launcher built with Vite, TypeScript and vanilla DOM AP
 - Responsive dark gaming dashboard
 - Discover page, category filters and live search
 - Favourites and recently played stored locally
-- Game detail modal and playable built-in Neon Drift-inspired arcade experience (Snake-style score attack)
-- Keyboard controls (arrows / WASD), score and local best score
+- Game detail modal with embedded hosted HTML5 games
+- External game player with fullscreen/gamepad permissions where supported and open-in-new-tab fallback
 - Vercel-ready single-page routing
 
 ## Run locally
@@ -31,4 +31,4 @@ Import this repository into Vercel. Framework preset: **Vite**. Build command: `
 
 ## Notes
 
-The catalogue currently contains original demo entries. A title is only genuinely playable when its game implementation or a properly licensed/embeddable game source is added. User favourites and history are browser-local in this starter; accounts, cloud sync, public leaderboards and admin publishing need a backend such as Supabase and are not enabled yet.
+The catalogue embeds selected games from [Saurabh Singh's Games Hub](https://github.com/sausi-7/games), an MIT-licensed open-source collection. The original game site remains the host; NEXUS PLAY does not claim ownership of those games. If a host blocks embedding, use the player's **Open in new tab** link. User favourites and history are browser-local; accounts, cloud sync, public leaderboards and admin publishing need a backend such as Supabase and are not enabled yet.
