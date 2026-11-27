@@ -116,8 +116,8 @@ export async function syncLibraryToCloud() {
   if (!auth.user) return;
   const localFavs: string[] = JSON.parse(localStorage.getItem("nexus-favorites") || "[]");
   const localRecent: string[] = JSON.parse(localStorage.getItem("nexus-recent") || "[]");
-  if (localFavs.length) await client.from("user_favourites").upsert(localFavs.map(game_id=>({game_id})),{onConflict:"user_id,game_id"});
-  if (localRecent.length) await client.from("user_recent_games").upsert(localRecent.map(game_id=>({game_id,played_at:new Date().toISOString()})),{onConflict:"user_id,game_id"});
+  if (localFavs.length) await client.from("user_favourites").upsert(localFavs.map(game_id=>({user_id:auth.user!.id,game_id})),{onConflict:"user_id,game_id"});
+  if (localRecent.length) await client.from("user_recent_games").upsert(localRecent.map(game_id=>({user_id:auth.user!.id,game_id,played_at:new Date().toISOString()})),{onConflict:"user_id,game_id"});
   const [favs,recentGames] = await Promise.all([
     client.from("user_favourites").select("game_id"),
     client.from("user_recent_games").select("game_id,played_at").order("played_at",{ascending:false}).limit(30)
