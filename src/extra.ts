@@ -1,3 +1,4 @@
+import { bindAccountPage, renderAccountPage } from "./account.js";
 type ExtraPage = "Cloud Gaming" | "GN-Math" | "Classroom 6x" | "Settings";
 const sources = {
   "GN-Math": { url: "https://gn-math.dev/#games", description: "Browse the GN-Math browser game collection, with puzzle, logic and arcade picks." },
@@ -7,6 +8,7 @@ const iconMap: Record<ExtraPage,string> = {"Cloud Gaming":"▣","GN-Math":"⌘",
 export function bindExtraPages() {
   const nav = document.querySelector(".sidebar nav");
   if (!nav) return;
+  bindAccountPage();
   (["Cloud Gaming","GN-Math","Classroom 6x","Settings"] as ExtraPage[]).forEach((name) => {
     if (nav.querySelector('[data-extra="'+name+'"]')) return;
     const b = document.createElement("button");
