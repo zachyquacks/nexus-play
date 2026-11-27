@@ -44,12 +44,27 @@ export async function renderAccountPage() {
   if (user) { renderSignedIn(user); await syncLibraryToCloud(); }
   else renderSignedOut();
   authSubscription?.unsubscribe();
-  authSubscription = client!.auth.onAuthStateChange((_event, session) => {
+  authSubscription = client!.auth.onAuthStateChange((event, session) => {
     if (!document.querySelector("#account-panel")) return;
+    if (event === "PASSWORD_RECOVERY" && session?.user) { renderRecovery(); return; }
     if (session?.user) { renderSignedIn(session.user); void syncLibraryToCloud(); }
     else renderSignedOut();
   });
 }
+
+function renderRecovery() {
+  const panel=document.querySelector<HTMLElement>("#account-panel");
+  if(!panel)return;
+  panel.innerHTML='<h2>Choose a new password</h2><form id="recovery-form" class="auth-form"><label>New password<input name="password" type="password" minlength="8" autocomplete="new-password" required placeholder="At least 8 characters"></label><button class="primary-btn" type="submit">Update password ↗</button></form>';
+  panel.querySelector<HTMLFormElement>("#recovery-form")?.addEventListener("submit",async event=>{
+    event.preventDefault();
+    const password=String(new FormData(event.currentTarget as HTMLFormElement).get("password")||"");
+    const {error}=await client!.auth.updateUser({password});
+    if(error)showMessage(error.message,true);
+    else{showMessage("Password updated successfully.");const user=await currentUser();if(user)renderSignedIn(user);}
+  });
+}
+
 function renderSetupPanel() {
   const panel = document.querySelector<HTMLElement>("#account-panel");
   if (!panel) return;
