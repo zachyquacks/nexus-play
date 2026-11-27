@@ -36,7 +36,7 @@ Import this repository into Vercel. Framework preset: **Vite**. Build command: `
 
 ## Accounts and cloud sync
 
-Account screens use Supabase Auth. To enable them, create a Supabase project, run `supabase/schema.sql` in its SQL Editor, then set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in the Vercel project environment and redeploy. Only the public anon key belongs in browser environment variables; never expose the service-role key. Account sign-up/login and profile editing are enabled after configuration. Favourites/recent-game tables are prepared with row-level security; syncing the existing local library into those tables is a separate integration step.
+Account screens use Supabase Auth. To enable them, create a Supabase project, run `supabase/schema.sql` in its SQL Editor, then set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in the Vercel project environment and redeploy. Only the public anon key belongs in browser environment variables; never expose the service-role key. Account sign-up/login and profile editing are enabled after configuration. Local favourites and recent games are merged into the signed-in account and synced through tables protected by row-level security. See `.env.example` for the required public settings.
 
 ## Cloud gaming
 
