@@ -75,7 +75,8 @@ function render() {
 }
 function bind(){
   bindExtraPages();
-  app.querySelectorAll<HTMLElement>("[data-view]").forEach(el=>el.addEventListener("click",()=>{activeView=el.dataset.view||"Home";activeCategory="All";render();}));
+  app.querySelectorAll<HTMLElement>("[data-view]").forEach(el=>el.addEventListener("click",()=>{activeView=el.dataset.view||"Home";activeCategory="All";render();
+window.addEventListener("nexus-library-synced",()=>{favorites=read("nexus-favorites");recent=read("nexus-recent");render();});}));
   app.querySelectorAll<HTMLElement>("[data-category]").forEach(el=>el.addEventListener("click",()=>{activeCategory=el.dataset.category||"All";render();}));
   app.querySelectorAll<HTMLElement>("[data-open]").forEach(el=>el.addEventListener("click",()=>openGame(el.dataset.open||"")));
   app.querySelectorAll<HTMLElement>("[data-fav]").forEach(el=>el.addEventListener("click",()=>{const id=el.dataset.fav||"";favorites=favorites.includes(id)?favorites.filter(x=>x!==id):[...favorites,id];localStorage.setItem("nexus-favorites",JSON.stringify(favorites));render();}));
